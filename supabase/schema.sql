@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS public.roadmaps (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     profile_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
     track_title TEXT NOT NULL,
-    skill_level TEXT NOT NULL, -- 'Boshlang\'ich', 'O\'rta', 'Ilg\'or'
+    skill_level TEXT NOT NULL,
     weekly_commitment TEXT NOT NULL,
     modules JSONB NOT NULL,
     completed_items TEXT[] DEFAULT '{}',
@@ -56,110 +56,30 @@ CREATE TABLE IF NOT EXISTS public.mentor_chats (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 5. Create Opportunities & Grants Table (Grantlar va tanlovlar)
-CREATE TABLE IF NOT EXISTS public.opportunities (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    organizer TEXT NOT NULL,
-    category TEXT NOT NULL, -- 'Grant', 'Tanlov', 'Kurs', 'Xakaton'
-    target_audience TEXT NOT NULL,
-    prize_or_grant TEXT,
-    deadline DATE,
-    link TEXT NOT NULL,
-    description TEXT NOT NULL,
-    is_featured BOOLEAN DEFAULT false,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 6. Saved Opportunities Table (Saqlangan grantlar)
-CREATE TABLE IF NOT EXISTS public.saved_opportunities (
+-- 5. Saved Videos Table (Saqlangan YouTube video darslari)
+CREATE TABLE IF NOT EXISTS public.saved_videos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     profile_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
-    opportunity_id TEXT REFERENCES public.opportunities(id) ON DELETE CASCADE,
-    status TEXT DEFAULT 'Ko\'rib chiqilmoqda', -- 'Ko\'rib chiqilmoqda', 'Ariza topshirildi', 'Qabul qilindi'
-    ai_motivation_letter TEXT,
+    video_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    channel TEXT,
+    category TEXT,
     saved_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 7. Seed Initial Opportunities Data (Dastlabki nufuzli grantlar bazasi)
-INSERT INTO public.opportunities (id, title, organizer, category, target_audience, prize_or_grant, deadline, link, description, is_featured)
-VALUES 
-(
-    'technovation-girls-uz',
-    'Technovation Girls Uzbekistan',
-    'Tech4Impact & Technovation Global',
-    'Tanlov',
-    '8-18 yoshli maktab va litsey qizlari',
-    'Xalqaro final, $10,000+ sovrinlar va Silikon vodiysi sayohati',
-    '2025-04-15',
-    'https://technovationchallenge.org',
-    'Dunyo bo\'ylab qizlarni ijtimoiy muammolarni mobil ilovalar va AI orqali hal qilishga o\'rgatuvchi eng nufuzli global dastur.',
-    true
-),
-(
-    'wtm-google-scholarship',
-    'Google Women Techmakers Scholars Program',
-    'Google',
-    'Grant',
-    'Universitet va institut talaba qizlari',
-    '€7,000 stipendiya + Google Retreat anjumani',
-    '2025-05-30',
-    'https://www.womentechmakers.com',
-    'Informatika va texnologiya sohasidagi iqtidorli talaba qizlarni qo\'llab-quvvatlash uchun Google tomonidan ajratiladigan maxsus xalqaro grant.',
-    true
-),
-(
-    'girls-in-ai-global',
-    'Girls in AI Global Hackathon',
-    'Teens in AI',
-    'Xakaton',
-    '12-18 yoshli o\'smir qizlar',
-    'AI mentorlik, noutbuklar va xalqaro inkubatsiya dasturi',
-    '2025-06-01',
-    'https://www.teensinai.com',
-    'BMTning Barqaror rivojlanish maqsadlariga mos sun\'iy intellekt modellarini yaratish bo\'yicha global onlayn xakaton.',
-    true
-),
-(
-    'grace-hopper-scholarship',
-    'Grace Hopper Celebration (GHC) Student Fellowship',
-    'AnitaB.org',
-    'Grant',
-    'Barcha IT sohasidagi talaba va tadqiqotchi qizlar',
-    'AQSh safar xarajatlari to\'liq qoplanadi + GHC chiptasi',
-    '2025-07-10',
-    'https://ghc.anitab.org',
-    'Dunyodagi eng katta ayollar texnologiya anjumanida ishtirok etish uchun xalqaro grant dasturi.',
-    true
-),
-(
-    'it-park-women-academy',
-    'IT-Park "Qizlar IT-da" Grantlari',
-    'IT Park Uzbekistan',
-    'Kurs',
-    '16+ yoshdagi O\'zbekistonlik qizlar',
-    '100% bepul o\'qish va amaliyot kafolati',
-    '2025-08-01',
-    'https://it-park.uz',
-    'O\'zbekiston bo\'ylab qizlarni dasturlash, QA testlash va AI ko\'nikmalariga bepul o\'qitish davlat dasturi.',
-    true
-)
-ON CONFLICT (id) DO NOTHING;
-
--- 8. Enable Row Level Security (RLS)
+-- 6. Enable Row Level Security (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.quiz_results ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.roadmaps ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.mentor_chats ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.opportunities ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.saved_opportunities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.saved_videos ENABLE ROW LEVEL SECURITY;
 
--- 9. Create Public Policies (Read opportunities is open to everyone)
-CREATE POLICY "Public opportunities are viewable by all" 
-ON public.opportunities FOR SELECT USING (true);
+-- 7. Create Public Policies
+CREATE TABLE IF NOT EXISTS public.saved_videos (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid()
+);
 
--- Allow anonymous or authenticated inserts/reads for demo and user convenience
-CREATE POLICY "Profiles can be managed by owner" 
+CREATE POLICY "Profiles can be managed by all" 
 ON public.profiles FOR ALL USING (true) WITH CHECK (true);
 
 CREATE POLICY "Quiz results can be managed by all" 
@@ -171,5 +91,5 @@ ON public.roadmaps FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Mentor chats can be managed by all" 
 ON public.mentor_chats FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY "Saved opportunities can be managed by all" 
-ON public.saved_opportunities FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Saved videos can be managed by all" 
+ON public.saved_videos FOR ALL USING (true) WITH CHECK (true);

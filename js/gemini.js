@@ -100,7 +100,6 @@ Ushbu qizga eng mos keluvchi zamonaviy IT va AI yo'nalishini tahlil qilib, JSON 
       throw new Error("JSON formati topilmadi");
     } catch (err) {
       console.warn("AI so'rovi xatolik berdi yoki keshlandi, mukammal fallback ishlatiladi:", err);
-      // Fallback generator based on answers
       return this.getFallbackQuizResult(answers);
     }
   },
@@ -125,7 +124,7 @@ Javobni DOIMO toza JSON formatida ber:
       "goal": "Ushbu haftaning asosiy maqsadi",
       "topics": ["Mavzu 1", "Mavzu 2", "Mavzu 3"],
       "practicalTask": "Haftalik amaliy mini-vazifa",
-      "resources": ["Resurs 1 (Bepul kurs/qo'llanma)", "Resurs 2"]
+      "resources": ["YouTube: O'zbek tilidagi darslik", "W3Schools qo'llanmasi"]
     }
   ]
 }`;
@@ -167,25 +166,56 @@ Sening xususiyatlaring:
   },
 
   /**
-   * 4. AI Yordamida Motivatsion Xat (Grantlar uchun Cover Letter)
+   * 4. AI YouTube Video & Mavzu Tahlilchisi (Smart YouTube Link & Video Analyzer)
    */
-  async generateMotivationLetter(data) {
-    const systemInstruction = `Sen xalqaro grantlar va tanlovlarga talaba qizlarni tayyorlovchi yetuk grant konsultantisan. O'zbek tilida professional, ta'sirchan va aniq dalillarga asoslangan Motivatsion Xat (Statement of Purpose / Cover Letter) yoz.`;
+  async analyzeYouTubeVideoOrTopic(inputQuery, targetTrack = "Barchasi") {
+    const systemPrompt = `Sen DigiHer AI platformasining ta'lim ekspertisan.
+Foydalanuvchi bergan YouTube havolasi yoki mavzu bo'yicha tahlil o'tkazib, o'quvchiga aynan qanday o'rganish kerakligini, video qaysi yo'nalishga oidligini aniqlab ber.
+Javobni DOIMO toza JSON formatida qaytar:
+{
+  "detectedTopic": "Video / Mavzu nomi",
+  "category": "ai | frontend | backend | mobile | uiux",
+  "categoryLabel": "Sun'iy Intellekt | Frontend | Python/Backend | Mobil Dasturlash | UI/UX",
+  "level": "Boshlang'ich | O'rta | Ilg'or",
+  "summary": "Ushbu video orqali o'quvchi nimalarni o'rganishi haqida 2-3 jumlalik qisqacha izoh",
+  "keyTakeaways": ["O'rganiladigan tushuncha 1", "O'rganiladigan tushuncha 2", "O'rganiladigan tushuncha 3"],
+  "recommendedAction": "Videoni ko'rgach qilinishi kerak bo'lgan amaliy qadam",
+  "matchWithUserTrack": "Ushbu video o'quvchining yo'nalishiga qanchalik mosligi haqida izoh"
+}`;
 
-    const prompt = `Quyidagi ma'lumotlar asosida "${data.opportunityTitle}" dasturi/granti uchun ajoyib motivatsion xat yozib ber:
-- Ishtirokchi ismi: ${data.name || "Dasturchi Qiz"}
-- Yoshi / O'qish joyi: ${data.education || "Talaba / Maktab o'quvchisi"}
-- Qiziqish sohasi: ${data.techInterest || "AI va Dasturlash"}
-- Maqsadi va orzusi: ${data.goals || "O'zbekistonda xotin-qizlar uchun IT ekotizimini rivojlantirish va xalqaro tajriba to'plash"}
-- Grant nima uchun kerak: ${data.reason || "Bilimlarimni chuqurlashtirish va yangi ijtimoiy AI loyihamni ishga tushirish uchun"}
+    const prompt = `Foydalanuvchi kiritgan YouTube havolasi yoki mavzusi: "${inputQuery}"
+O'quvchining qiziqqan yo'nalishi: "${targetTrack}"
 
-Iltimos, xatni rasmiy, ilhomlantiruvchi va xalqaro komissiya a'zolarini qoyil qoldiradigan uslubda tuz.`;
+Ushbu video/mavzuni chuqur tahlil qilib, o'quvchi qizga yo'l-yo'riq sifatida JSON formatda qaytar.`;
 
-    return await this.generateText(prompt, systemInstruction);
+    try {
+      const rawText = await this.generateText(prompt, systemPrompt);
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      throw new Error("JSON parsing failed");
+    } catch (err) {
+      console.warn("YouTube AI xatolik berdi, fallback qo'llanadi:", err);
+      return {
+        detectedTopic: inputQuery.includes("http") ? "IT va Dasturlash Bo'yicha Maxsus Video Dars" : inputQuery,
+        category: "frontend",
+        categoryLabel: "Frontend va Veb-Dasturlash",
+        level: "Boshlang'ich",
+        summary: "Ushbu video sizga dasturlashning asosiy tushunchalarini amaliy misollar bilan o'rganishga yordam beradi.",
+        keyTakeaways: [
+          "Nazariy asoslar va dasturlash mantig'i",
+          "Amaliy kod yozish va muhitni sozlash",
+          "Mini-loyihani amalga oshirish"
+        ],
+        recommendedAction: "Videoni ko'rish davomida kodlarni DigiHer Kod Ustaxonasida takrorlang.",
+        matchWithUserTrack: "Siz tanlagan yo'nalish uchun juda foydali va muhim dars."
+      };
+    }
   },
 
   /**
-   * Fallback for Career Quiz when offline
+   * Fallback for Career Quiz
    */
   getFallbackQuizResult(answers) {
     const interest = (answers.interest || "").toLowerCase();
@@ -202,7 +232,7 @@ Iltimos, xatni rasmiy, ilhomlantiruvchi va xalqaro komissiya a'zolarini qoyil qo
         firstSteps: [
           "Figma asoslari bilan tanishib, birinchi mobil ilova dizaynini chizing",
           "HTML va CSS da oddiy shaxsiy portfolio sahifangizni yarating",
-          "DigiHer AI platformasida haftalik o'quv rejasini boshlang"
+          "DigiHer AI platformasida Video Darslar bo'limidagi darslarni boshlang"
         ],
         alternativeCareers: ["Mobil Ilovalar Dizayneri", "Frontend Dasturchi", "Product Manager"]
       };
@@ -212,13 +242,13 @@ Iltimos, xatni rasmiy, ilhomlantiruvchi va xalqaro komissiya a'zolarini qoyil qo
         matchScore: 96,
         badge: "AI Kelajak Yetakchisi",
         summary: "Sizda mantiqiy tahlil, qonuniyatlarni topish va zamonaviy intellektual modellarni boshqarishga kuchli moyillik mavjud. AI hozirda dunyoni o'zgartirmoqda va siz bu jarayonning markazida bo'lasiz.",
-        whyForGirls: "Sun'iy intellekt sohasida qizlar hissasi juda yuqori baholanadi. Xalqaro grantlar va nufuzli kompaniyalarda AI muhandisi qizlarga talab katta.",
+        whyForGirls: "Sun'iy intellekt sohasida qizlar hissasi juda yuqori baholanadi. Zamonaviy xalqaro kompaniyalarda AI muhandisi qizlarga talab katta.",
         salaryRange: "$1,000 - $4,500+",
         topSkills: ["Python Dasturlash", "Machine Learning & Gemini API", "Pandas & Data Visualization", "Prompt Engineering"],
         firstSteps: [
           "Python tilida asosiy sintaksis va ma'lumot turlarini o'rganing",
           "Gemini va OpenAI API-lar orqali birinchi aqlli yordamchingizni yarating",
-          "Kaggle platformasida kichik ma'lumotlar tahlilini bajaring"
+          "Video Darslar bo'limidagi Sun'iy Intellekt videolarini ko'ring"
         ],
         alternativeCareers: ["Data Analyst", "AI Prompt Engineer", "Machine Learning Muhandisi"]
       };
@@ -262,7 +292,7 @@ Iltimos, xatni rasmiy, ilhomlantiruvchi va xalqaro komissiya a'zolarini qoyil qo
             "Sintaksis va birinchi 'Salom, Dunyo' amaliyoti"
           ],
           practicalTask: "GitHub profilingizni ochib, o'zingiz haqingizda birinchi README sahifangizni yaratish.",
-          resources: ["W3Schools bepul darslari", "DigiHer AI Mentor yo'riqnomasi", "YouTube darslar"]
+          resources: ["W3Schools bepul darslari", "DigiHer AI Video Darslar bo'limi", "YouTube darslar"]
         },
         {
           week: 2,
@@ -298,7 +328,7 @@ Iltimos, xatni rasmiy, ilhomlantiruvchi va xalqaro komissiya a'zolarini qoyil qo
             "Rezyume va LinkedIn sahifasiga joylash sirlari"
           ],
           practicalTask: "To'liq tayyor loyihani Vercel ga deploy qilib, havolasini DigiHer hamjamiyatiga ulashish.",
-          resources: ["Vercel Deployment Guide", "Women in Tech rezyume shabloni"]
+          resources: ["Vercel Deployment Guide", "Women in Tech portfolio shabloni"]
         }
       ]
     };

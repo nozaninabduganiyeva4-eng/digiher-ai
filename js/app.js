@@ -15,7 +15,7 @@ const App = {
     window.CareerQuiz.init();
     window.LearningRoadmap.init();
     window.ProjectMentor.init();
-    window.OpportunitiesHub.init();
+    window.VideoHub.init();
 
     this.setupNavigation();
     this.setupSettingsModal();
@@ -24,7 +24,7 @@ const App = {
 
     // Check URL hash for direct tab navigation
     const hash = window.location.hash.replace('#', '');
-    if (hash && ['quiz', 'roadmap', 'mentor', 'opportunities', 'saved'].includes(hash)) {
+    if (hash && ['quiz', 'roadmap', 'mentor', 'videos', 'saved'].includes(hash)) {
       this.switchTab(hash);
     }
   },
@@ -52,7 +52,7 @@ const App = {
     window.location.hash = tabId;
 
     // Hide all tab sections
-    const tabs = ["quiz", "roadmap", "mentor", "opportunities", "saved"];
+    const tabs = ["quiz", "roadmap", "mentor", "videos", "saved"];
     tabs.forEach(t => {
       const section = document.getElementById(`section-${t}`);
       if (section) {
@@ -94,9 +94,8 @@ const App = {
     const container = document.getElementById("saved-items-container");
     if (!container) return;
 
-    const savedOpps = window.SupabaseManager.getSavedOpportunities();
+    const savedVideos = window.SupabaseManager.getSavedVideos();
     const quizResult = window.SupabaseManager.getSavedQuizResult();
-    const activeRoadmap = window.SupabaseManager.getActiveRoadmap();
 
     let html = `
       <div class="space-y-8 animate-fade-in">
@@ -105,7 +104,7 @@ const App = {
             <i data-lucide="bookmark" class="w-6 h-6 text-fuchsia-600"></i> Mening Saqlanganlarim
           </h2>
           <p class="text-xs text-gray-500 mt-1">
-            Test natijalaringiz, faol o'quv rejangiz va saqlangan grantlaringiz
+            Test natijalaringiz, faol o'quv rejangiz va saqlangan video darslaringiz
           </p>
         </div>
     `;
@@ -113,54 +112,54 @@ const App = {
     // 1. Saved Career
     if (quizResult) {
       html += `
-        <div class="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-fuchsia-100 dark:border-fuchsia-900/40 shadow-sm">
+        <div class="bg-white dark:bg-gray-900 rounded-3xl p-6 border border-fuchsia-100 dark:border-fuchsia-900/40 shadow-sm">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold text-fuchsia-600 uppercase tracking-wider">Tanlangan IT Yo'nalishi</span>
+            <span class="text-xs font-bold text-fuchsia-600 uppercase tracking-wider">Tavsiya Etilgan IT Mutaxassisligi</span>
             <span class="text-xs font-bold text-emerald-600">${quizResult.matchScore || 95}% Moslik</span>
           </div>
           <h3 class="text-xl font-bold text-gray-900 dark:text-white">${quizResult.primaryCareer}</h3>
           <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">${quizResult.summary}</p>
-          <div class="mt-4 flex gap-2">
-            <button onclick="App.switchTab('roadmap')" class="px-4 py-2 bg-fuchsia-600 text-white rounded-xl text-xs font-bold">
+          <div class="mt-4 flex flex-wrap gap-2">
+            <button onclick="App.switchTab('roadmap')" class="px-4 py-2 bg-fuchsia-600 text-white rounded-xl text-xs font-bold shadow">
               O'quv Rejasiga O'tish
+            </button>
+            <button onclick="App.switchTab('videos')" class="px-4 py-2 border border-pink-200 dark:border-pink-800 text-pink-600 dark:text-pink-300 rounded-xl text-xs font-bold">
+              Video Darslarni Ko'rish
             </button>
           </div>
         </div>
       `;
     }
 
-    // 2. Saved Opportunities
+    // 2. Saved Videos
     html += `
       <div>
         <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-          <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i> Saqlangan Grantlar & Tanlovlar (${savedOpps.length})
+          <i data-lucide="youtube" class="w-4 h-4 text-red-500"></i> Saqlangan Video Darslar (${savedVideos.length})
         </h3>
     `;
 
-    if (savedOpps.length === 0) {
+    if (savedVideos.length === 0) {
       html += `
-        <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 text-center text-gray-400 border border-dashed text-xs">
-          Hozircha hech qanday grant saqlanmagan. "Grantlar va Tanlovlar" bo'limidan o'zingizga ma'qulini belgilang.
+        <div class="bg-white dark:bg-gray-900 rounded-3xl p-8 text-center text-gray-400 border border-dashed text-xs">
+          Hozircha hech qanday video saqlanmagan. "Video Darslar" bo'limidan o'zingizga qiziq darslarni belgilab oling.
         </div>
       `;
     } else {
       html += `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          ${savedOpps.map(opp => `
+          ${savedVideos.map(v => `
             <div class="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-200 dark:border-gray-800 flex flex-col justify-between">
               <div>
-                <h4 class="font-bold text-gray-900 dark:text-white text-sm">${opp.title}</h4>
-                <div class="text-xs text-gray-500 mt-0.5">${opp.organizer || ''}</div>
-                ${opp.motivationLetter ? `
-                  <div class="mt-3 p-3 bg-pink-50 dark:bg-pink-950/30 rounded-xl text-xs text-gray-700 dark:text-gray-300">
-                    <span class="font-bold text-pink-700 dark:text-pink-400 block mb-1">AI Motivatsion Xat tayyorlangan ✓</span>
-                    <p class="line-clamp-2 text-[11px]">${opp.motivationLetter.substring(0, 120)}...</p>
-                  </div>
-                ` : ''}
+                <span class="text-[10px] font-bold text-fuchsia-600 uppercase tracking-wider">${v.categoryLabel || v.category}</span>
+                <h4 class="font-bold text-gray-900 dark:text-white text-sm mt-1">${v.title}</h4>
+                <div class="text-xs text-gray-500 mt-0.5">${v.channel || ''}</div>
               </div>
               <div class="mt-4 pt-3 border-t flex justify-between items-center text-xs">
-                <span class="text-fuchsia-600 font-semibold">${opp.status || "Ko'rib chiqilmoqda"}</span>
-                <button onclick="window.OpportunitiesHub.toggleSave('${opp.id}'); App.renderSavedSection();" class="text-red-500 hover:text-red-700 font-bold">
+                <button onclick="window.VideoHub.openVideoModal('${v.id}')" class="text-fuchsia-600 font-bold hover:underline flex items-center gap-1">
+                  <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i> Ko'rish
+                </button>
+                <button onclick="window.VideoHub.toggleSaveVideo('${v.id}'); App.renderSavedSection();" class="text-red-500 hover:text-red-700 font-bold">
                   O'chirish
                 </button>
               </div>

@@ -425,12 +425,21 @@ const CareerQuiz = {
             <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Qaytadan test topshirish
           </button>
 
-          <button 
-            onclick="CareerQuiz.startRoadmapForCareer('${res.primaryCareer.replace(/'/g, "\\'")}')" 
-            class="px-6 py-3 rounded-xl bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white text-sm font-bold hover:opacity-95 shadow-lg shadow-pink-500/30 flex items-center gap-2"
-          >
-            <i data-lucide="map" class="w-4 h-4"></i> Shaxsiy O'quv Rejasini Boshlash
-          </button>
+          <div class="flex flex-wrap gap-2">
+            <button 
+              onclick="CareerQuiz.openVideosForCareer('${res.primaryCareer.replace(/'/g, "\\'")}')" 
+              class="px-5 py-3 rounded-xl border border-pink-300 dark:border-pink-800 text-pink-600 dark:text-pink-300 hover:bg-pink-50 dark:hover:bg-pink-950/40 text-xs sm:text-sm font-bold flex items-center gap-2 transition-all"
+            >
+              <i data-lucide="youtube" class="w-4 h-4 text-red-500"></i> Video Darslarni Ko'rish
+            </button>
+
+            <button 
+              onclick="CareerQuiz.startRoadmapForCareer('${res.primaryCareer.replace(/'/g, "\\'")}')" 
+              class="px-6 py-3 rounded-xl bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white text-xs sm:text-sm font-bold hover:opacity-95 shadow-lg shadow-pink-500/30 flex items-center gap-2"
+            >
+              <i data-lucide="map" class="w-4 h-4"></i> O'quv Rejasini Boshlash
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -460,6 +469,23 @@ const CareerQuiz = {
     }
     if (window.LearningRoadmap && window.LearningRoadmap.selectTrack) {
       window.LearningRoadmap.selectTrack(careerName);
+    }
+  },
+
+  openVideosForCareer(careerName) {
+    if (window.App && window.App.switchTab) {
+      window.App.switchTab('videos');
+    }
+    const lower = (careerName || "").toLowerCase();
+    let category = "all";
+    if (lower.includes("ai") || lower.includes("intellekt") || lower.includes("data")) category = "ai";
+    else if (lower.includes("dizayn") || lower.includes("ui") || lower.includes("ux")) category = "uiux";
+    else if (lower.includes("mobil") || lower.includes("flutter")) category = "mobile";
+    else if (lower.includes("backend") || lower.includes("python")) category = "backend";
+    else if (lower.includes("front") || lower.includes("veb") || lower.includes("web")) category = "frontend";
+
+    if (window.VideoHub && window.VideoHub.setCategory) {
+      window.VideoHub.setCategory(category);
     }
   }
 };

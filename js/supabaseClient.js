@@ -99,37 +99,38 @@ const SupabaseManager = {
   },
 
   /**
-   * Saved Opportunities & Motivation Letters
+   * Saved Videos & Tutorials
    */
-  getSavedOpportunities() {
-    const stored = localStorage.getItem(window.CONFIG.STORAGE_KEYS.SAVED_OPPORTUNITIES);
+  getSavedVideos() {
+    const stored = localStorage.getItem("digiher_saved_videos");
     return stored ? JSON.parse(stored) : [];
   },
 
-  saveOpportunity(item) {
-    const list = this.getSavedOpportunities();
+  saveVideo(item) {
+    const list = this.getSavedVideos();
     const existingIndex = list.findIndex(x => x.id === item.id);
     if (existingIndex >= 0) {
       list[existingIndex] = { ...list[existingIndex], ...item };
     } else {
       list.unshift(item);
     }
-    localStorage.setItem(window.CONFIG.STORAGE_KEYS.SAVED_OPPORTUNITIES, JSON.stringify(list));
+    localStorage.setItem("digiher_saved_videos", JSON.stringify(list));
 
     if (this.client) {
-      this.client.from('saved_opportunities').upsert([{
-        opportunity_id: item.id,
-        ai_motivation_letter: item.motivationLetter || '',
-        status: item.status || 'Ko\'rib chiqilmoqda'
+      this.client.from('saved_videos').upsert([{
+        video_id: item.id,
+        title: item.title,
+        channel: item.channel,
+        category: item.category
       }]).then();
     }
     return list;
   },
 
-  removeSavedOpportunity(id) {
-    let list = this.getSavedOpportunities();
+  removeSavedVideo(id) {
+    let list = this.getSavedVideos();
     list = list.filter(x => x.id !== id);
-    localStorage.setItem(window.CONFIG.STORAGE_KEYS.SAVED_OPPORTUNITIES, JSON.stringify(list));
+    localStorage.setItem("digiher_saved_videos", JSON.stringify(list));
     return list;
   },
 
