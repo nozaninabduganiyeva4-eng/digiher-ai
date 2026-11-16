@@ -1,11 +1,15 @@
 # 🌸 DigiHer AI — Qizlar uchun raqamli imkoniyatlar platformasi
 
+[![Jonli Sayt](https://img.shields.io/badge/Live%20Demo-nozaninabduganiyeva4--eng.github.io%2Fdigiher--ai-fuchsia?style=for-the-badge&logo=google-chrome&logoColor=white)](https://nozaninabduganiyeva4-eng.github.io/digiher-ai/)
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/nozaninabduganiyeva4-eng/digiher-ai)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Powered by Gemini AI](https://img.shields.io/badge/AI-Google%20Gemini-pink.svg)](https://ai.google.dev/)
 [![Database-Supabase](https://img.shields.io/badge/Database-Supabase-emerald.svg)](https://supabase.com/)
 
 > **DigiHer AI** — O'zbekistonlik va xalqaro qizlar hamda ayollarga texnologiya, dasturlash va sun'iy intellektni o'rganishda yordam beruvchi yangi avlod raqamli imkoniyatlar platformasi.
+
+🌐 **Har qanday qurilma va foydalanuvchi uchun doimiy ishlaydigan havola:**  
+👉 **[https://nozaninabduganiyeva4-eng.github.io/digiher-ai/](https://nozaninabduganiyeva4-eng.github.io/digiher-ai/)**
 
 ---
 
