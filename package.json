@@ -1,0 +1,27 @@
+{
+  "name": "digiher-ai",
+  "version": "1.0.0",
+  "description": "DigiHer AI — Qizlar uchun raqamli imkoniyatlar platformasi (AI kasb yo'naltiruvchi, individual ta'lim rejasi, AI loyiha mentori va grantlar portali)",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 3000",
+    "serve": "npx serve ."
+  },
+  "keywords": [
+    "women-in-tech",
+    "girls-who-code",
+    "ai",
+    "gemini-api",
+    "uzbekistan",
+    "supabase",
+    "vercel",
+    "career-quiz",
+    "tech-education"
+  ],
+  "author": "Nozanin Abduganiyeva & DigiHer Community",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nozaninabduganiyeva4-eng/digiher-ai.git"
+  }
+}
