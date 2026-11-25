@@ -3,7 +3,7 @@
  */
 
 const App = {
-  currentTab: "quiz",
+  currentTab: "home", // default to main gateway
 
   init() {
     console.log("DigiHer AI Platformasi ishga tushmoqda...");
@@ -16,23 +16,133 @@ const App = {
     window.LearningRoadmap.init();
     window.ProjectMentor.init();
     window.VideoHub.init();
+    if (window.InclusiveModule) window.InclusiveModule.init();
+    if (window.GamesModule) window.GamesModule.init();
 
     this.setupNavigation();
     this.setupSettingsModal();
     this.setupThemeToggle();
+    this.setupAccessibility();
     this.updateStatusBadge();
+    this.checkUserOnboarding();
 
     // Check URL hash for direct tab navigation
     const hash = window.location.hash.replace('#', '');
-    if (hash && ['quiz', 'roadmap', 'mentor', 'videos', 'saved'].includes(hash)) {
+    const validTabs = ['home', 'inclusive', 'quiz', 'roadmap', 'mentor', 'videos', 'games', 'saved'];
+    if (hash && validTabs.includes(hash)) {
       this.switchTab(hash);
+    } else {
+      this.switchTab('home');
     }
+  },
+
+  // 1. Onboarding: Ask user's full name & age
+  getUserProfile() {
+    try {
+      const data = localStorage.getItem(window.CONFIG.STORAGE_KEYS.USER_PROFILE);
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  saveUserProfile(name, age) {
+    if (!name || !name.trim()) return;
+    const profile = {
+      name: name.trim(),
+      age: parseInt(age, 10) || null,
+      updatedAt: new Date().toISOString()
+    };
+    localStorage.setItem(window.CONFIG.STORAGE_KEYS.USER_PROFILE, JSON.stringify(profile));
+    this.updateUserHeaderBadge();
+    
+    // Also sync with Inclusive mentor greeting
+    if (window.InclusiveModule && window.InclusiveModule.renderInclusiveChat) {
+      window.InclusiveModule.renderInclusiveChat();
+    }
+  },
+
+  checkUserOnboarding() {
+    const profile = this.getUserProfile();
+    this.updateUserHeaderBadge();
+
+    const modal = document.getElementById("user-onboarding-modal");
+    if (!profile && modal) {
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+  },
+
+  openOnboardingModal() {
+    const modal = document.getElementById("user-onboarding-modal");
+    if (!modal) return;
+    const profile = this.getUserProfile();
+    if (profile) {
+      const nameInput = document.getElementById("onboarding-name");
+      const ageInput = document.getElementById("onboarding-age");
+      if (nameInput) nameInput.value = profile.name || "";
+      if (ageInput) ageInput.value = profile.age || "";
+    }
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  },
+
+  closeOnboardingModal() {
+    const modal = document.getElementById("user-onboarding-modal");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+  },
+
+  submitOnboarding() {
+    const nameInput = document.getElementById("onboarding-name");
+    const ageInput = document.getElementById("onboarding-age");
+    const name = nameInput ? nameInput.value.trim() : "";
+    const age = ageInput ? ageInput.value.trim() : "";
+
+    if (!name) {
+      alert("Iltimos, ism va familiyangizni kiriting! 🌸");
+      return;
+    }
+
+    this.saveUserProfile(name, age);
+    this.closeOnboardingModal();
+
+    if (window.confetti) {
+      window.confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
+    }
+  },
+
+  updateUserHeaderBadge() {
+    const badge = document.getElementById("user-profile-header-btn");
+    if (!badge) return;
+    const profile = this.getUserProfile();
+
+    if (profile && profile.name) {
+      const firstName = profile.name.split(' ')[0];
+      badge.innerHTML = `
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-pink-100/70 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-800 text-pink-700 dark:text-pink-300 font-extrabold text-xs cursor-pointer hover:bg-pink-200 transition-all">
+          <span>🌸</span>
+          <span>${firstName}${profile.age ? ` (${profile.age} yosh)` : ''}</span>
+          <i data-lucide="edit-3" class="w-3 h-3 text-pink-400"></i>
+        </div>
+      `;
+    } else {
+      badge.innerHTML = `
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-fuchsia-50 dark:bg-slate-800 border border-fuchsia-200 dark:border-slate-700 text-fuchsia-700 dark:text-pink-300 font-bold text-xs cursor-pointer hover:bg-fuchsia-100 transition-all">
+          <i data-lucide="user" class="w-3.5 h-3.5"></i>
+          <span>Kirish</span>
+        </div>
+      `;
+    }
+    if (window.lucide) window.lucide.createIcons();
   },
 
   setupNavigation() {
     const navButtons = document.querySelectorAll(".nav-tab-btn");
     navButtons.forEach(btn => {
-      btn.addEventListener("click", (e) => {
+      btn.addEventListener("click", () => {
         const tab = btn.dataset.tab;
         if (tab) this.switchTab(tab);
       });
@@ -51,8 +161,9 @@ const App = {
     this.currentTab = tabId;
     window.location.hash = tabId;
 
-    // Hide all tab sections
-    const tabs = ["quiz", "roadmap", "mentor", "videos", "saved"];
+    // All available sections
+    const tabs = ["home", "inclusive", "quiz", "roadmap", "mentor", "videos", "games", "saved"];
+    
     tabs.forEach(t => {
       const section = document.getElementById(`section-${t}`);
       if (section) {
@@ -69,10 +180,10 @@ const App = {
     const navButtons = document.querySelectorAll(".nav-tab-btn");
     navButtons.forEach(btn => {
       if (btn.dataset.tab === tabId) {
-        btn.classList.add("text-fuchsia-600", "dark:text-pink-400", "border-fuchsia-600", "font-bold");
+        btn.classList.add("text-fuchsia-600", "dark:text-pink-400", "border-fuchsia-600", "font-extrabold");
         btn.classList.remove("text-gray-500", "border-transparent");
       } else {
-        btn.classList.remove("text-fuchsia-600", "dark:text-pink-400", "border-fuchsia-600", "font-bold");
+        btn.classList.remove("text-fuchsia-600", "dark:text-pink-400", "border-fuchsia-600", "font-extrabold");
         btn.classList.add("text-gray-500", "border-transparent");
       }
     });
@@ -81,9 +192,11 @@ const App = {
     const mobileDrawer = document.getElementById("mobile-drawer");
     if (mobileDrawer) mobileDrawer.classList.add("hidden");
 
-    // Special reload for saved tab
+    // Special reload handlers
     if (tabId === "saved") {
       this.renderSavedSection();
+    } else if (tabId === "games" && window.GamesModule) {
+      window.GamesModule.renderActiveTab();
     }
 
     if (window.lucide) window.lucide.createIcons();
@@ -96,16 +209,24 @@ const App = {
 
     const savedVideos = window.SupabaseManager.getSavedVideos();
     const quizResult = window.SupabaseManager.getSavedQuizResult();
+    const profile = this.getUserProfile();
 
     let html = `
       <div class="space-y-8 animate-fade-in">
-        <div>
-          <h2 class="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-            <i data-lucide="bookmark" class="w-6 h-6 text-fuchsia-600"></i> Mening Saqlanganlarim
-          </h2>
-          <p class="text-xs text-gray-500 mt-1">
-            Test natijalaringiz, faol o'quv rejangiz va saqlangan video darslaringiz
-          </p>
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+              <i data-lucide="bookmark" class="w-6 h-6 text-fuchsia-600"></i> Mening Saqlanganlarim
+            </h2>
+            <p class="text-xs text-gray-500 mt-1">
+              Test natijalaringiz, faol o'quv rejangiz va saqlangan video darslaringiz
+            </p>
+          </div>
+          ${profile ? `
+            <div class="bg-pink-50 dark:bg-pink-950/40 px-4 py-2 rounded-2xl border border-pink-200 dark:border-pink-800 text-xs text-pink-700 dark:text-pink-300 font-bold">
+              👤 ${profile.name} (${profile.age ? `${profile.age} yosh` : ''})
+            </div>
+          ` : ''}
         </div>
     `;
 
@@ -172,6 +293,33 @@ const App = {
     html += `</div></div>`;
     container.innerHTML = html;
     if (window.lucide) window.lucide.createIcons();
+  },
+
+  setupAccessibility() {
+    const savedContrast = localStorage.getItem("digiher_high_contrast") === "true";
+    if (savedContrast) {
+      document.documentElement.classList.add("accessibility-high-contrast");
+    }
+
+    const savedFontSize = localStorage.getItem("digiher_font_size") || "normal";
+    this.setFontSize(savedFontSize, false);
+  },
+
+  toggleHighContrast() {
+    const isNowContrast = document.documentElement.classList.toggle("accessibility-high-contrast");
+    localStorage.setItem("digiher_high_contrast", isNowContrast);
+  },
+
+  setFontSize(size, save = true) {
+    document.documentElement.classList.remove("font-size-lg", "font-size-xl");
+    if (size === "lg") {
+      document.documentElement.classList.add("font-size-lg");
+    } else if (size === "xl") {
+      document.documentElement.classList.add("font-size-xl");
+    }
+    if (save) {
+      localStorage.setItem("digiher_font_size", size);
+    }
   },
 
   setupSettingsModal() {

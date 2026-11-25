@@ -1,4 +1,4 @@
-/* DigiHer AI — Custom Styles & Animations */
+/* DigiHer AI — Custom Styles, Accessibility & Animations */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
@@ -11,7 +11,7 @@ body {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -20,18 +20,44 @@ body {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes bounceGentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-bounce-gentle {
+  animation: bounceGentle 2.5s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px -3px rgba(236, 72, 153, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 35px 2px rgba(217, 70, 239, 0.45);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s infinite;
 }
 
 /* Glassmorphism */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .dark .glass-panel {
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(15, 23, 42, 0.88);
 }
 
 /* Custom Scrollbar */
@@ -85,4 +111,33 @@ body {
 
 .prose pre code {
   color: inherit;
+}
+
+/* Accessibility: Font Size Scalers */
+html.font-size-lg {
+  font-size: 112%;
+}
+
+html.font-size-xl {
+  font-size: 125%;
+}
+
+/* Accessibility: High Contrast Mode */
+html.accessibility-high-contrast body {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+html.accessibility-high-contrast .bg-white,
+html.accessibility-high-contrast .dark\:bg-slate-900,
+html.accessibility-high-contrast .bg-slate-50 {
+  background-color: #121212 !important;
+  border-color: #fde047 !important;
+  color: #ffffff !important;
+}
+
+html.accessibility-high-contrast button {
+  border-width: 2px !important;
+  border-color: #fde047 !important;
+  font-weight: 800 !important;
 }
