@@ -15,6 +15,7 @@ const InclusiveModule = {
       emoji: "🐼",
       title: "Mayin va Mehribon Ustoz",
       greeting: "Salom do'stginam! Men Panda Pomi bo'laman. Men juda sabrli va quvnoqman. Menga 'Ustoz, ...' deb murojaat qilsang, senga dunyodagi eng qiziq narsalarni o'rgataman! 🌸",
+      greetingRu: "Привет, {name}! Я твоя добрая учительница Панда Поми. Я с радостью помогу тебе узнать много нового и интересного!",
       avatarBg: "from-emerald-400 to-teal-500",
       elevenVoiceId: "EXAVITQu4vr4xnSDxMaL", // Sarah (reassuring, gentle)
       voicePitch: 1.1,
@@ -26,6 +27,7 @@ const InclusiveModule = {
       emoji: "🦊",
       title: "Epchil va Topqir Ustoz",
       greeting: "Salom-salom! Men Zukko Tulkivoyman! Har qanday topishmoq va yangi texnologiyalarni tez o'rganamiz! Meni chaqirish uchun 'Ustoz' deb so'z boshlashni unutmang! ✨",
+      greetingRu: "Привет-привет, {name}! Я умный Лисёнок. Давай вместе разгадывать загадки и изучать технологии!",
       avatarBg: "from-amber-400 to-orange-500",
       elevenVoiceId: "FGY2WhTYpPnrIDTdsKH5", // Laura (enthusiast, quirky)
       voicePitch: 1.2,
@@ -37,6 +39,7 @@ const InclusiveModule = {
       emoji: "🦉",
       title: "Bilimdon va Vazmin Ustoz",
       greeting: "Xush ko'rdik! Men Dono Boyqushman. Kitoblar, ilm-fan va kompyuter sirlarini senga erinmay tushuntirib beraman. Menga 'Ustoz' deb savol bering! 📚",
+      greetingRu: "Здравствуй, {name}! Я Мудрая Сова. Я с удовольствием помогу тебе учиться и познавать мир!",
       avatarBg: "from-indigo-400 to-purple-500",
       elevenVoiceId: "JBFqnCBsd6RMkjVDRZzb", // George (warm storyteller)
       voicePitch: 0.9,
@@ -48,6 +51,7 @@ const InclusiveModule = {
       emoji: "🐬",
       title: "Quvnoq va Chaqqon Ustoz",
       greeting: "Salom! Men sho'x va quvnoq Delfin Dilyaman! O'yinlar, ijodkorlik va slaydlar tayyorlashni birga o'rganamiz! Faqat 'Ustoz' deb murojaat qilish esdan chiqmasin! 🌊",
+      greetingRu: "Привет, {name}! Я весёлый Дельфинчик Диля. Давай учиться, играть и творить вместе!",
       avatarBg: "from-cyan-400 to-blue-500",
       elevenVoiceId: "cgSgspJ2msm6clMCkdW9", // Jessica (playful, bright)
       voicePitch: 1.15,
@@ -59,6 +63,7 @@ const InclusiveModule = {
       emoji: "🐰",
       title: "Shirinso'z va Do'stona Ustoz",
       greeting: "Assalomu alaykum! Men Quyoncha Bonuman! Birgalikda dars qilamiz, o'yinlar o'ynaymiz va ajoyib taqdimotlar yasaymiz! Meni 'Ustoz' deb chaqiring! 🥕",
+      greetingRu: "Привет, {name}! Я Зайка Бону. Давай вместе делать уроки и создавать красивые проекты!",
       avatarBg: "from-pink-400 to-rose-500",
       elevenVoiceId: "pFZP5JQG7iQjIQuC4Bku", // Lily (velvety, sweet)
       voicePitch: 1.25,
@@ -137,8 +142,10 @@ const InclusiveModule = {
     const userName = profile?.name ? profile.name.split(' ')[0] : "do'stginam";
     
     const welcomeMsg = `Assalomu alaykum ${userName}! Men sizning tanlagan ustozingiz — ${animal.name}man! ${animal.greeting}`;
-    this.addChatMessage("mentor", welcomeMsg);
-    this.speakText(welcomeMsg);
+    const welcomeVoiceRu = (animal.greetingRu || `Привет, ${userName}! Я твой виртуальный учитель. Давай учиться вместе!`).replace("{name}", userName);
+
+    this.addChatMessage("mentor", welcomeMsg, welcomeVoiceRu);
+    this.speakText(welcomeVoiceRu);
 
     if (window.confetti) {
       window.confetti({ particleCount: 35, spread: 60, origin: { y: 0.7 } });
@@ -198,14 +205,16 @@ const InclusiveModule = {
       const animal = this.animals[this.selectedAnimal];
       const profile = window.App ? window.App.getUserProfile() : null;
       const userName = profile?.name ? profile.name.split(' ')[0] : "aziz do'stim";
+      const welcomeVoiceRu = (animal.greetingRu || `Привет, ${userName}! Я твой виртуальный учитель. Давай учиться вместе!`).replace("{name}", userName);
 
       this.chatHistory.push({
         role: "mentor",
-        text: `Salom, ${userName}! 🌸 Men sizning ustozingiz **${animal.name}**man!\n\nMen bilan gaplashish uchun xabaringizda albatta **«Ustoz»** so'zini ishlating.\n\nMasalan:\n* «Ustoz, slayd yaratishni o'rgating!»\n* «Ustoz, bugun qanday qiziqarli narsani o'rganamiz?»\n* «Ustoz, kompyuter qanday ishlaydi?»`
+        text: `Salom, ${userName}! 🌸 Men sizning ustozingiz **${animal.name}**man!\n\nMen bilan gaplashish uchun xabaringizda albatta **«Ustoz»** so'zini ishlating.\n\nMasalan:\n* «Ustoz, slayd yaratishni o'rgating!»\n* «Ustoz, bugun qanday qiziqarli narsani o'rganamiz?»\n* «Ustoz, kompyuter qanday ishlaydi?»`,
+        voiceText: welcomeVoiceRu
       });
     }
 
-    container.innerHTML = this.chatHistory.map(msg => {
+    container.innerHTML = this.chatHistory.map((msg, index) => {
       const isUser = msg.role === "user";
       const animal = this.animals[this.selectedAnimal];
       const parsedText = window.marked ? window.marked.parse(msg.text) : msg.text;
@@ -232,9 +241,9 @@ const InclusiveModule = {
             ${!isUser ? `
               <div class="mt-2.5 pt-2 border-t border-gray-100 dark:border-slate-700/60 flex items-center justify-end">
                 <button 
-                  onclick="InclusiveModule.speakText('${msg.text.replace(/'/g, "\\'").replace(/\n/g, ' ')}')"
+                  onclick="InclusiveModule.speakMessage(${index})"
                   class="text-[11px] text-fuchsia-600 dark:text-pink-400 font-bold hover:underline flex items-center gap-1"
-                  title="Ovoz chiqarib o'qish"
+                  title="Ovoz chiqarib eshitish"
                 >
                   <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Ovozli eshitish
                 </button>
@@ -249,9 +258,16 @@ const InclusiveModule = {
     if (window.lucide) window.lucide.createIcons();
   },
 
-  addChatMessage(role, text) {
-    this.chatHistory.push({ role, text });
+  addChatMessage(role, text, voiceText = null) {
+    this.chatHistory.push({ role, text, voiceText: voiceText || text });
     this.renderInclusiveChat();
+  },
+
+  speakMessage(index) {
+    const msg = this.chatHistory[index];
+    if (msg) {
+      this.speakText(msg.voiceText || msg.text);
+    }
   },
 
   async handleUserMessage(customInput = null) {
@@ -276,9 +292,10 @@ const InclusiveModule = {
 
     if (!hasUstoz) {
       const promptReminder = `Mening aziz do'stim ${userName}! 🌸\n\nMen senga xursandchilik bilan yordam berishim uchun gapingizda albatta **«Ustoz»** so'zini ishlating.\n\n*Masalan:* **«Ustoz, ${text}»** deb yozsang, darhol javob beraman! 😊✨`;
+      const voiceReminderRu = `Дорогая ${userName}! Чтобы я ответила, пожалуйста, начни своё обращение со слова Устоз!`;
       setTimeout(() => {
-        this.addChatMessage("mentor", promptReminder);
-        this.speakText(`Mening aziz do'stim ${userName}! Meni chaqirish uchun gapingizda albatta Ustoz so'zini ishlating.`);
+        this.addChatMessage("mentor", promptReminder, voiceReminderRu);
+        this.speakText(voiceReminderRu);
       }, 500);
       return;
     }
@@ -309,6 +326,7 @@ const InclusiveModule = {
 
     try {
       let replyText = "";
+      let speechRussianText = "";
 
       if (isSlideRequest) {
         // Specific user scenario: recommends Uzbek video tutorials, then presentation tools, then AI tips!
@@ -329,6 +347,8 @@ Endi bevosita o'zingiz sinab ko'rishingiz mumkin bo'lgan eng yaxshi vositalar:
 3. 📑 **[Google Slides (slides.google.com)](https://slides.google.com)** — Bepul va brauzerning o'zida do'stlar bilan birgalikda ishlash.
 
 💡 *Ustozingizdan maslahat:* Slaydda matn kam, rasmlar va g'oyalar ko'p bo'lsa, uni hamma maroq bilan tomosha qiladi! Qaysi mavzuda slayd qilmoqchisiz, aytib bering?`;
+
+        speechRussianText = `Отличная идея, ${userName}! Создание красивых слайдов и презентаций — это замечательно. Сначала посмотри полезные видеоуроки, а затем используй инструменты Gamma и Canva!`;
       } else {
         // General query answered by Gemini using the Animal Mentor persona
         const systemPrompt = `Sen DigiHer AI platformasining Inklyuziv ta'lim bo'limidagi virtual AI ustoz — "${animal.name}" (${animal.title}) san!
@@ -338,23 +358,41 @@ Sening xaraktering:
 2. Har bir jumlada mehr, rag'bat va ishonch tuyg'usi bo'lsin.
 3. Qiyin tushunchalarni ham oddiy ertaknamo yoki qiziqarli misollar bilan tushuntir.
 4. Foydalanuvchiga ismi bilan ("${userName}jon", "${userName}") murojaat qil.
-5. Bolalar va o'quvchilar uchun xavfsiz, motivatsion va quvnoq javob ber.`;
+5. Bolalar va o'quvchilar uchun xavfsiz, motivatsion va quvnoq javob ber.
 
-        replyText = await window.GeminiService.generateText(text, systemPrompt);
+MUHIM QAT'IY TALAB:
+1. Barcha matnlaring, tushuntirishlaring va tavsiyalaring 100% O'ZBEK TILIDA bo'lishi shart! Ekrandagi chatda faqat o'zbek tili ko'rinadi.
+2. Faqatgina javobingning eng oxirida [VOICE_RU: ...] tegi ichida shu javobingning bolalar uchun quvnoq, samimiy rus tilidagi 1-2 gapli qisqa ovozli xulosasini kirit. Masalan:
+[VOICE_RU: Молодец, ${userName}! Я с радостью помогу тебе узнать об этом. Давай учиться вместе!]
+Ushbu teg faqat ovoz chiqarish uchun ishlatiladi va ekrandagi chatdan avtomatik olib tashlanadi.`;
+
+        const rawReply = await window.GeminiService.generateText(text, systemPrompt);
+
+        // Extract Russian voice if present
+        const voiceMatch = rawReply.match(/\[VOICE_RU:\s*([\s\S]*?)\]/i);
+        if (voiceMatch) {
+          speechRussianText = voiceMatch[1].trim();
+          replyText = rawReply.replace(/\[VOICE_RU:\s*[\s\S]*?\]/gi, '').trim();
+        } else {
+          replyText = rawReply;
+          speechRussianText = `Молодец, ${userName}! Я с радостью помогу тебе узнать много нового и интересного!`;
+        }
       }
 
       const indicator = document.getElementById(typingId);
       if (indicator) indicator.remove();
 
-      this.addChatMessage("mentor", replyText);
-      this.speakText(replyText.substring(0, 180));
+      this.addChatMessage("mentor", replyText, speechRussianText);
+      this.speakText(speechRussianText);
     } catch (err) {
       console.error("Inclusive mentor error:", err);
       const indicator = document.getElementById(typingId);
       if (indicator) indicator.remove();
 
-      const fallback = `Barakalla, ${userName}! 🌸 Men sizning savolingizni eshitdim. Keling, birgalikda o'rganamiz va ajoyib yangi narsalarni kashf qilamiz! Meni yana chaqiring!`;
-      this.addChatMessage("mentor", fallback);
+      const fallbackUz = `Barakalla, ${userName}! 🌸 Men sizning savolingizni eshitdim. Keling, birgalikda o'rganamiz va ajoyib yangi narsalarni kashf qilamiz! Meni yana chaqiring!`;
+      const fallbackRu = `Молодец, ${userName}! Давай учиться вместе и узнавать много нового!`;
+      this.addChatMessage("mentor", fallbackUz, fallbackRu);
+      this.speakText(fallbackRu);
     } finally {
       this.isThinking = false;
       if (sendBtn) sendBtn.disabled = false;
@@ -408,13 +446,13 @@ Sening xaraktering:
       console.warn("ElevenLabs endpoint not available, falling back to Web Speech:", err);
     }
 
-    // 2. Fallback to browser Web Speech API
+    // 2. Fallback to browser Web Speech API (Russian voice)
     if (window.speechSynthesis) {
       try {
         const utterance = new SpeechSynthesisUtterance(cleanText.substring(0, 250));
         utterance.pitch = animal?.voicePitch || 1.1;
         utterance.rate = animal?.voiceRate || 1.0;
-        utterance.lang = "uz-UZ";
+        utterance.lang = "ru-RU";
         window.speechSynthesis.speak(utterance);
       } catch (e) {
         console.warn("Speech synthesis unavailable:", e);
