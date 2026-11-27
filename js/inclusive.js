@@ -16,6 +16,7 @@ const InclusiveModule = {
       title: "Mayin va Mehribon Ustoz",
       greeting: "Salom do'stginam! Men Panda Pomi bo'laman. Men juda sabrli va quvnoqman. Menga 'Ustoz, ...' deb murojaat qilsang, senga dunyodagi eng qiziq narsalarni o'rgataman! 🌸",
       avatarBg: "from-emerald-400 to-teal-500",
+      elevenVoiceId: "EXAVITQu4vr4xnSDxMaL", // Sarah (reassuring, gentle)
       voicePitch: 1.1,
       voiceRate: 0.95
     },
@@ -26,6 +27,7 @@ const InclusiveModule = {
       title: "Epchil va Topqir Ustoz",
       greeting: "Salom-salom! Men Zukko Tulkivoyman! Har qanday topishmoq va yangi texnologiyalarni tez o'rganamiz! Meni chaqirish uchun 'Ustoz' deb so'z boshlashni unutmang! ✨",
       avatarBg: "from-amber-400 to-orange-500",
+      elevenVoiceId: "FGY2WhTYpPnrIDTdsKH5", // Laura (enthusiast, quirky)
       voicePitch: 1.2,
       voiceRate: 1.0
     },
@@ -36,6 +38,7 @@ const InclusiveModule = {
       title: "Bilimdon va Vazmin Ustoz",
       greeting: "Xush ko'rdik! Men Dono Boyqushman. Kitoblar, ilm-fan va kompyuter sirlarini senga erinmay tushuntirib beraman. Menga 'Ustoz' deb savol bering! 📚",
       avatarBg: "from-indigo-400 to-purple-500",
+      elevenVoiceId: "JBFqnCBsd6RMkjVDRZzb", // George (warm storyteller)
       voicePitch: 0.9,
       voiceRate: 0.9
     },
@@ -46,6 +49,7 @@ const InclusiveModule = {
       title: "Quvnoq va Chaqqon Ustoz",
       greeting: "Salom! Men sho'x va quvnoq Delfin Dilyaman! O'yinlar, ijodkorlik va slaydlar tayyorlashni birga o'rganamiz! Faqat 'Ustoz' deb murojaat qilish esdan chiqmasin! 🌊",
       avatarBg: "from-cyan-400 to-blue-500",
+      elevenVoiceId: "cgSgspJ2msm6clMCkdW9", // Jessica (playful, bright)
       voicePitch: 1.15,
       voiceRate: 1.05
     },
@@ -56,6 +60,7 @@ const InclusiveModule = {
       title: "Shirinso'z va Do'stona Ustoz",
       greeting: "Assalomu alaykum! Men Quyoncha Bonuman! Birgalikda dars qilamiz, o'yinlar o'ynaymiz va ajoyib taqdimotlar yasaymiz! Meni 'Ustoz' deb chaqiring! 🥕",
       avatarBg: "from-pink-400 to-rose-500",
+      elevenVoiceId: "pFZP5JQG7iQjIQuC4Bku", // Lily (velvety, sweet)
       voicePitch: 1.25,
       voiceRate: 1.0
     }
@@ -356,22 +361,64 @@ Sening xaraktering:
     }
   },
 
-  speakText(text) {
-    if (!this.voiceEnabled || !window.speechSynthesis) return;
+  currentAudio: null,
 
+  async speakText(text) {
+    if (!this.voiceEnabled) return;
+
+    // Stop ongoing audio or Web Speech
+    if (this.currentAudio) {
+      try {
+        this.currentAudio.pause();
+        this.currentAudio.currentTime = 0;
+      } catch (e) {}
+      this.currentAudio = null;
+    }
+    if (window.speechSynthesis) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
+
+    const cleanText = text.replace(/[*_#`[\]()]/g, ' ').replace(/https?:\/\/\S+/g, '').trim();
+    if (!cleanText) return;
+
+    const animal = this.animals[this.selectedAnimal];
+    const voiceId = animal?.elevenVoiceId || 'EXAVITQu4vr4xnSDxMaL';
+
+    // 1. Try ElevenLabs TTS endpoint (Multilingual model with natural Uzbek pronunciation)
     try {
-      window.speechSynthesis.cancel(); // Stop any ongoing speech
-      const cleanText = text.replace(/[*_#`[\]()]/g, ' ').replace(/https?:\/\/\S+/g, '');
-      const utterance = new SpeechSynthesisUtterance(cleanText.substring(0, 250));
-      
-      const animal = this.animals[this.selectedAnimal];
-      utterance.pitch = animal?.voicePitch || 1.1;
-      utterance.rate = animal?.voiceRate || 1.0;
-      utterance.lang = "uz-UZ";
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: cleanText.substring(0, 300),
+          voiceId: voiceId,
+          modelId: 'eleven_multilingual_v2'
+        })
+      });
 
-      window.speechSynthesis.speak(utterance);
-    } catch (e) {
-      console.warn("Speech synthesis unavailable:", e);
+      if (response.ok) {
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        this.currentAudio = audio;
+        audio.play().catch(e => console.warn("ElevenLabs audio play prevented:", e));
+        return;
+      }
+    } catch (err) {
+      console.warn("ElevenLabs endpoint not available, falling back to Web Speech:", err);
+    }
+
+    // 2. Fallback to browser Web Speech API
+    if (window.speechSynthesis) {
+      try {
+        const utterance = new SpeechSynthesisUtterance(cleanText.substring(0, 250));
+        utterance.pitch = animal?.voicePitch || 1.1;
+        utterance.rate = animal?.voiceRate || 1.0;
+        utterance.lang = "uz-UZ";
+        window.speechSynthesis.speak(utterance);
+      } catch (e) {
+        console.warn("Speech synthesis unavailable:", e);
+      }
     }
   },
 
